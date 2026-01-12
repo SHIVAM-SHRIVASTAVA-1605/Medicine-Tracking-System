@@ -1,0 +1,228 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'core/theme/app_theme.dart';
+import 'data/local/hive_service.dart';
+import 'data/local/settings_service.dart';
+import 'logic/services/notification_service.dart';
+import 'logic/providers/medicine_provider.dart';
+import 'logic/providers/settings_provider.dart';
+import 'ui/screens/home_screen.dart';
+import 'ui/screens/add_medicine_screen.dart';
+import 'ui/screens/settings_screen.dart';
+import 'ui/screens/statistics_screen.dart';
+import 'data/models/medicine_model.dart';
+
+// Global navigation key
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await HiveService.init();
+  await SettingsService.init();
+  await NotificationService.init();
+  await NotificationService.loadSettings();
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _setupNotificationHandler();
+  }
+
+  void _setupNotificationHandler() {
+    print('\n');
+    print('🔧 Setting up notification handler in MyApp...');
+    NotificationService.onNotificationAction = (action) {
+      print('\n');
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('📨 NOTIFICATION ACTION RECEIVED IN MYAPP');
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('🎬 Action: $action');
+      print('🕐 Time: ${DateTime.now()}');
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      _handleNotificationAction(action);
+    };
+    print('✅ Notification handler setup complete');
+    print('\n');
+  }
+
+  void _handleNotificationAction(String action) async {
+    print('\n');
+    print('╔═══════════════════════════════════════════════════╗');
+    print('║   HANDLING NOTIFICATION ACTION                    ║');
+    print('╚═══════════════════════════════════════════════════╝');
+    print('🎯 Action String: "$action"');
+    print('⏰ Processing Time: ${DateTime.now()}');
+
+    final context = navigatorKey.currentContext;
+    print('🔍 Checking context availability...');
+    if (context == null) {
+      print('❌ FATAL ERROR: Context is null!');
+      print('   Cannot access Provider without context');
+      print('   NavigatorKey might not be properly initialized');
+      return;
+    }
+    print('✅ Context is available');
+
+    if (action.startsWith('snooze_')) {
+      print('\n🔔 SNOOZE ACTION DETECTED');
+      print('─────────────────────────────────────────────────');
+      final idStr = action.replaceFirst('snooze_', '');
+      print('📝 Extracted ID string: "$idStr"');
+      final id = int.tryParse(idStr);
+      print('🔢 Parsed notification ID: $id');
+
+      if (id != null) {
+        print('✅ Valid notification ID');
+        print('🔍 Searching for medicine with notification ID: $id');
+
+        // Find the medicine by notification ID
+        final provider = Provider.of<MedicineProvider>(context, listen: false);
+        print('✅ MedicineProvider accessed');
+        final medicines = provider.medicinesMap;
+        print('📊 Total medicines in database: ${medicines.length}');
+
+        MedicineModel? medicine;
+        for (var entry in medicines.entries) {
+          print(
+              '   Checking medicine "${entry.value.name}" (ID: ${entry.value.notificationId})');
+          if (entry.value.notificationId == id) {
+            medicine = entry.value;
+            print('🎯 MATCH FOUND!');
+            print('   Medicine: ${medicine.name}');
+            print('   Dose: ${medicine.dose}');
+            break;
+          }
+        }
+
+        if (medicine != null) {
+          print('\n⏰ Executing snooze...');
+          // Snooze notification
+          await NotificationService.snoozeNotification(
+            id: id,
+            title: 'Medicine Reminder (Snoozed)',
+            body: 'Time to take ${medicine.name} - ${medicine.dose}',
+          );
+          print('✅ Notification snoozed successfully');
+
+          // Show feedback
+          print('📢 Showing snackbar feedback...');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${medicine.name} snoozed'),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+          print('✅ Snackbar displayed');
+        } else {
+          print('\n❌ ERROR: Medicine not found!');
+          print('   No medicine has notification ID: $id');
+          print('   Available notification IDs:');
+          for (var entry in medicines.entries) {
+            print('      - ${entry.value.name}: ${entry.value.notificationId}');
+          }
+        }
+      } else {
+        print('❌ ERROR: Could not parse ID from string "$idStr"');
+      }
+    } else if (action.startsWith('dismiss_')) {
+      print('\n💊 MARK TAKEN ACTION DETECTED');
+      print('─────────────────────────────────────────────────');
+      final idStr = action.replaceFirst('dismiss_', '');
+      print('📝 Extracted ID string: "$idStr"');
+      final id = int.tryParse(idStr);
+      print('🔢 Parsed notification ID: $id');
+
+      if (id != null) {
+        print('✅ Valid notification ID');
+        print('🔍 Searching for medicine with notification ID: $id');
+
+        // Find and mark medicine as taken
+        final provider = Provider.of<MedicineProvider>(context, listen: false);
+        print('✅ MedicineProvider accessed');
+        final medicines = provider.medicinesMap;
+        print('📊 Total medicines in database: ${medicines.length}');
+
+        bool found = false;
+        for (var entry in medicines.entries) {
+          print(
+              '   Checking medicine "${entry.value.name}" (ID: ${entry.value.notificationId})');
+          if (entry.value.notificationId == id) {
+            found = true;
+            print('🎯 MATCH FOUND!');
+            print('   Medicine: ${entry.value.name}');
+            print('   Current taken status: ${entry.value.isTaken}');
+
+            // Mark as taken
+            print('\n💉 Marking medicine as taken...');
+            await provider.toggleMedicineTaken(entry.key);
+            print('✅ Medicine marked as taken successfully');
+            print('   New taken status: ${entry.value.isTaken}');
+
+            // Show feedback
+            print('📢 Showing snackbar feedback...');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${entry.value.name} marked as taken ✓'),
+                backgroundColor: Colors.teal,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+            print('✅ Snackbar displayed');
+            break;
+          }
+        }
+
+        if (!found) {
+          print('\n❌ ERROR: Medicine not found!');
+          print('   No medicine has notification ID: $id');
+          print('   Available notification IDs:');
+          for (var entry in medicines.entries) {
+            print('      - ${entry.value.name}: ${entry.value.notificationId}');
+          }
+        }
+      } else {
+        print('❌ ERROR: Could not parse ID from string "$idStr"');
+      }
+    }
+    print('\n╔═══════════════════════════════════════════════════╗');
+    print('║   ACTION HANDLING COMPLETE                        ║');
+    print('╚═══════════════════════════════════════════════════╝');
+    print('\n');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MedicineProvider()),
+        ChangeNotifierProvider(
+            create: (_) => SettingsProvider()..loadSettings()),
+      ],
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
+        title: 'Medicine Reminder',
+        theme: AppTheme.lightTheme,
+        debugShowCheckedModeBanner: false,
+        home: const HomeScreen(),
+        routes: {
+          '/add-medicine': (context) => const AddMedicineScreen(),
+          '/settings': (context) => const SettingsScreen(),
+          '/statistics': (context) => const StatisticsScreen(),
+        },
+      ),
+    );
+  }
+}
