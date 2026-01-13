@@ -120,51 +120,146 @@ class _MedicineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeFormat = DateFormat('hh:mm a');
     final formattedTime = timeFormat.format(medicine.time);
+    final dateFormat = DateFormat('MMM dd, yyyy');
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: medicine.isTaken ? 1 : 3,
       color: medicine.isTaken ? Colors.grey[100] : null,
-      child: ListTile(
-        leading: Checkbox(
-          value: medicine.isTaken,
-          onChanged: (value) {
-            context.read<MedicineProvider>().toggleMedicineTaken(medicineKey);
-          },
-          shape: const CircleBorder(),
-        ),
-        title: Text(
-          medicine.name,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            decoration: medicine.isTaken ? TextDecoration.lineThrough : null,
-            color: medicine.isTaken ? Colors.grey : null,
-          ),
-        ),
-        subtitle: Text(
-          'Dose: ${medicine.dose}',
-          style: TextStyle(
-            color: medicine.isTaken ? Colors.grey : null,
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              formattedTime,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                color: medicine.isTaken ? Colors.grey : null,
+            // Checkbox
+            Checkbox(
+              value: medicine.isTaken,
+              onChanged: (value) {
+                context.read<MedicineProvider>().toggleMedicineTaken(medicineKey);
+              },
+              shape: const CircleBorder(),
+            ),
+            const SizedBox(width: 8),
+            // Main content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Medicine name
+                  Text(
+                    medicine.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      decoration: medicine.isTaken ? TextDecoration.lineThrough : null,
+                      color: medicine.isTaken ? Colors.grey : null,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Dose
+                  Text(
+                    'Dose: ${medicine.dose}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: medicine.isTaken ? Colors.grey : Colors.grey[700],
+                    ),
+                  ),
+                  // Last taken (if recurring)
+                  if (medicine.isRecurring && medicine.lastTakenDate != null) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, size: 14, color: Colors.green[700]),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            'Last: ${DateFormat('MMM dd, hh:mm a').format(medicine.lastTakenDate!)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.green[700],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  // Next scheduled (if recurring)
+                  if (medicine.isRecurring && medicine.nextScheduledDate != null) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.schedule, size: 14, color: Colors.blue[700]),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            'Next: ${dateFormat.format(medicine.nextScheduledDate!)} at $formattedTime',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue[700],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                _showDeleteDialog(context);
-              },
+            // Right side - Time, badge, and delete
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // Recurrence badge (if recurring)
+                if (medicine.isRecurring)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.repeat,
+                          size: 12,
+                          color: Colors.blue[700],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          medicine.recurrenceDescription,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Time
+                Text(
+                  formattedTime,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: medicine.isTaken ? Colors.grey : null,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Delete button
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                  onPressed: () {
+                    _showDeleteDialog(context);
+                  },
+                ),
+              ],
             ),
           ],
         ),

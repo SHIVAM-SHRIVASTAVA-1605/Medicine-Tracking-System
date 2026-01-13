@@ -13,12 +13,16 @@ class AddMedicineScreen extends StatefulWidget {
 class _AddMedicineScreenState extends State<AddMedicineScreen> {
   final _nameController = TextEditingController();
   final _doseController = TextEditingController();
+  final _intervalController = TextEditingController(text: '1');
   TimeOfDay _selectedTime = TimeOfDay.now();
+  String _recurrenceType = 'none';
+  int _customInterval = 1;
 
   @override
   void dispose() {
     _nameController.dispose();
     _doseController.dispose();
+    _intervalController.dispose();
     super.dispose();
   }
 
@@ -53,6 +57,13 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
       return;
     }
 
+    if (_recurrenceType == 'custom' && _customInterval < 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid interval')),
+      );
+      return;
+    }
+
     final now = DateTime.now();
     final scheduledTime = DateTime(
       now.year,
@@ -62,6 +73,19 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
       _selectedTime.minute,
     );
 
+    // If the scheduled time is in the past, schedule for next occurrence
+    DateTime nextScheduled = scheduledTime;
+    if (scheduledTime.isBefore(now)) {
+      if (_recurrenceType == 'daily') {
+        nextScheduled = scheduledTime.add(const Duration(days: 1));
+      } else if (_recurrenceType == 'custom') {
+        nextScheduled = scheduledTime.add(Duration(days: _customInterval));
+      } else {
+        // For one-time, schedule for tomorrow
+        nextScheduled = scheduledTime.add(const Duration(days: 1));
+      }
+    }
+
     final notificationId = DateTime.now().millisecondsSinceEpoch % 100000;
 
     final medicine = MedicineModel(
@@ -69,6 +93,9 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
       dose: dose,
       time: scheduledTime,
       notificationId: notificationId,
+      recurrenceType: _recurrenceType,
+      recurrenceInterval: _recurrenceType == 'custom' ? _customInterval : 1,
+      nextScheduledDate: nextScheduled,
     );
 
     context.read<MedicineProvider>().addMedicine(medicine);
@@ -120,6 +147,90 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _recurrenceType,
+              decoration: const InputDecoration(
+                labelText: 'Recurrence',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.repeat),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'none', child: Text('One-time only')),
+                DropdownMenuItem(value: 'daily', child: Text('Daily')),
+                DropdownMenuItem(value: 'custom', child: Text('Custom interval')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _recurrenceType = value!;
+                });
+              },
+            ),
+            if (_recurrenceType == 'custom') ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _intervalController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Every',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.calendar_today),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _customInterval = int.tryParse(value) ?? 1;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text('days', style: TextStyle(fontSize: 16)),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  FilterChip(
+                    label: const Text('Weekly (7 days)'),
+                    selected: _customInterval == 7,
+                    onSelected: (selected) {
+                      setState(() {
+                        _customInterval = selected ? 7 : 1;
+                        _intervalController.text = '${_customInterval}';
+                      });
+                    },
+                  ),
+                  FilterChip(
+                    label: const Text('10 days'),
+                    selected: _customInterval == 10,
+                    onSelected: (selected) {
+                      setState(() {
+                        _customInterval = selected ? 10 : 1;
+                        _intervalController.text = '${_customInterval}';
+                      });
+                    },
+                  ),
+                  FilterChip(
+                    label: const Text('15 days'),
+                    selected: _customInterval == 15,
+                    onSelected: (selected) {
+                      setState(() {
+                        _customInterval = selected ? 15 : 1;
+                        _intervalController.text = '${_customInterval}';
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _saveMedicine,

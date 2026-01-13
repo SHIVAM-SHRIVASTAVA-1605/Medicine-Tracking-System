@@ -21,14 +21,18 @@ class MedicineModelAdapter extends TypeAdapter<MedicineModel> {
       dose: fields[1] as String,
       time: fields[2] as DateTime,
       notificationId: fields[3] as int,
-      isTaken: fields[4] as bool? ?? false,
+      isTaken: fields[4] as bool,
+      recurrenceType: fields[5] as String,
+      recurrenceInterval: fields[6] as int,
+      lastTakenDate: fields[7] as DateTime?,
+      nextScheduledDate: fields[8] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, MedicineModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -38,7 +42,15 @@ class MedicineModelAdapter extends TypeAdapter<MedicineModel> {
       ..writeByte(3)
       ..write(obj.notificationId)
       ..writeByte(4)
-      ..write(obj.isTaken);
+      ..write(obj.isTaken)
+      ..writeByte(5)
+      ..write(obj.recurrenceType)
+      ..writeByte(6)
+      ..write(obj.recurrenceInterval)
+      ..writeByte(7)
+      ..write(obj.lastTakenDate)
+      ..writeByte(8)
+      ..write(obj.nextScheduledDate);
   }
 
   @override

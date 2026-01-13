@@ -28,7 +28,6 @@ class SettingsService {
       final json = jsonDecode(jsonString);
       return AppSettings.fromJson(json);
     } catch (e) {
-      print('Error loading settings: $e');
       return AppSettings();
     }
   }

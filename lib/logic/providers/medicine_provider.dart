@@ -20,11 +20,14 @@ class MedicineProvider extends ChangeNotifier {
     final box = HiveService.getMedicineBox();
     await box.add(medicine);
 
+    // Schedule notification for next scheduled date (or initial time if not set)
+    final scheduledTime = medicine.nextScheduledDate ?? medicine.time;
+    
     await NotificationService.scheduleNotification(
       id: medicine.notificationId,
       title: 'Medicine Reminder',
       body: 'Time to take ${medicine.name} - ${medicine.dose}',
-      scheduledTime: medicine.time,
+      scheduledTime: scheduledTime,
     );
 
     notifyListeners();
@@ -58,6 +61,54 @@ class MedicineProvider extends ChangeNotifier {
 
     if (medicine != null) {
       medicine.isTaken = !medicine.isTaken;
+
+      // If marking as taken
+      if (medicine.isTaken) {
+        // Add to history
+        medicine.takenHistory.add(DateTime.now());
+        medicine.lastTakenDate = DateTime.now();
+
+        // If it's a recurring medicine, schedule next occurrence
+        if (medicine.isRecurring) {
+          // Calculate next scheduled date
+          DateTime nextDate;
+          if (medicine.recurrenceType == 'daily') {
+            nextDate = DateTime.now().add(const Duration(days: 1));
+          } else {
+            // custom interval
+            nextDate = DateTime.now().add(Duration(days: medicine.recurrenceInterval));
+          }
+
+          // Set time to the scheduled time of day
+          medicine.nextScheduledDate = DateTime(
+            nextDate.year,
+            nextDate.month,
+            nextDate.day,
+            medicine.time.hour,
+            medicine.time.minute,
+          );
+
+          // Schedule the next notification
+          await NotificationService.scheduleNotification(
+            id: medicine.notificationId,
+            title: 'Medicine Reminder',
+            body: 'Time to take ${medicine.name} - ${medicine.dose}',
+            scheduledTime: medicine.nextScheduledDate!,
+          );
+
+          // Mark as not taken for next occurrence
+          medicine.isTaken = false;
+        }
+      } else {
+        // If unmarking as taken, remove the last entry from history
+        if (medicine.takenHistory.isNotEmpty) {
+          medicine.takenHistory.removeLast();
+          medicine.lastTakenDate = medicine.takenHistory.isNotEmpty 
+              ? medicine.takenHistory.last 
+              : null;
+        }
+      }
+
       await box.put(key, medicine);
       notifyListeners();
     }
