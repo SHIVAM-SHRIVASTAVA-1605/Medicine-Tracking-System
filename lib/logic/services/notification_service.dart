@@ -50,66 +50,68 @@ class NotificationService {
             print('⏰ Time: ${DateTime.now()}');
             print('───────────────────────────────────────────────────');
 
-          // Handle notification actions
-          if (details.actionId == 'snooze') {
-            print('✅ SNOOZE BUTTON PRESSED!');
-            print('🔍 Processing snooze action...');
-            // Cancel the current notification first
-            if (details.payload != null) {
-              final id = int.tryParse(details.payload!);
-              print('📍 Notification ID parsed: $id');
-              if (id != null) {
-                await cancelNotification(id);
-                print('✅ Notification $id cancelled successfully');
-                print('📞 Calling callback: snooze_${details.payload}');
-                // Call the callback with snooze action
-                onNotificationAction?.call('snooze_${details.payload}');
-                print('✅ Snooze callback executed');
+            // Handle notification actions
+            if (details.actionId == 'snooze') {
+              print('✅ SNOOZE BUTTON PRESSED!');
+              print('🔍 Processing snooze action...');
+              // Cancel the current notification first
+              if (details.payload != null) {
+                final id = int.tryParse(details.payload!);
+                print('📍 Notification ID parsed: $id');
+                if (id != null) {
+                  await cancelNotification(id);
+                  print('✅ Notification $id cancelled successfully');
+                  print('📞 Calling callback: snooze_${details.payload}');
+                  // Call the callback with snooze action
+                  onNotificationAction?.call('snooze_${details.payload}');
+                  print('✅ Snooze callback executed');
+                } else {
+                  print('❌ ERROR: Could not parse notification ID');
+                }
               } else {
-                print('❌ ERROR: Could not parse notification ID');
+                print('❌ ERROR: Payload is null');
+              }
+            } else if (details.actionId == 'dismiss') {
+              print('✅ MARK TAKEN BUTTON PRESSED!');
+              print('🔍 Processing mark taken action...');
+              // Cancel the notification
+              if (details.payload != null) {
+                final id = int.tryParse(details.payload!);
+                print('📍 Notification ID parsed: $id');
+                if (id != null) {
+                  await cancelNotification(id);
+                  print('✅ Notification $id cancelled successfully');
+                  print('📞 Calling callback: dismiss_${details.payload}');
+                  // Call the callback with dismiss action
+                  onNotificationAction?.call('dismiss_${details.payload}');
+                  print('✅ Mark Taken callback executed');
+                } else {
+                  print('❌ ERROR: Could not parse notification ID');
+                }
+              } else {
+                print('❌ ERROR: Payload is null');
               }
             } else {
-              print('❌ ERROR: Payload is null');
-            }
-          } else if (details.actionId == 'dismiss') {
-            print('✅ MARK TAKEN BUTTON PRESSED!');
-            print('🔍 Processing mark taken action...');
-            // Cancel the notification
-            if (details.payload != null) {
-              final id = int.tryParse(details.payload!);
-              print('📍 Notification ID parsed: $id');
-              if (id != null) {
-                await cancelNotification(id);
-                print('✅ Notification $id cancelled successfully');
-                print('📞 Calling callback: dismiss_${details.payload}');
-                // Call the callback with dismiss action
-                onNotificationAction?.call('dismiss_${details.payload}');
-                print('✅ Mark Taken callback executed');
+              print('✅ NOTIFICATION BODY TAPPED (not an action button)');
+              print('🔍 Processing tap action...');
+              // Trigger alarm screen when notification is tapped
+              if (details.payload != null) {
+                final id = int.tryParse(details.payload!);
+                print('📍 Notification ID parsed: $id');
+                if (id != null) {
+                  print('📞 Calling callback: tap_${details.payload}');
+                  // Call the callback to show alarm screen
+                  onNotificationAction?.call('tap_${details.payload}');
+                  print('✅ Tap callback executed');
+                } else {
+                  print('❌ ERROR: Could not parse notification ID');
+                }
               } else {
-                print('❌ ERROR: Could not parse notification ID');
+                print('❌ ERROR: Payload is null');
               }
-            } else {
-              print('❌ ERROR: Payload is null');
             }
-          } else {
-            print('✅ NOTIFICATION BODY TAPPED (not an action button)');
-            print('🔍 Processing tap action...');
-            // Cancel the notification when tapped
-            if (details.payload != null) {
-              final id = int.tryParse(details.payload!);
-              print('📍 Notification ID parsed: $id');
-              if (id != null) {
-                await cancelNotification(id);
-                print('✅ Notification $id cancelled successfully');
-              } else {
-                print('❌ ERROR: Could not parse notification ID');
-              }
-            } else {
-              print('❌ ERROR: Payload is null');
-            }
-          }
-          print('═══════════════════════════════════════════════════');
-          print('\n\n');
+            print('═══════════════════════════════════════════════════');
+            print('\n\n');
           } catch (e, stackTrace) {
             print('\n');
             print('═══════════════════════════════════════════════════');
@@ -249,14 +251,14 @@ class NotificationService {
             '⏰ Snooze ${settings.snoozeMinutes}min',
             titleColor: const Color(0xFFFF9800), // Orange
             contextual: false,
-            showsUserInterface: true,
+            showsUserInterface: false, // Don't open app, work in background
           ),
           AndroidNotificationAction(
             'dismiss',
             '✓ Mark Taken',
             titleColor: const Color(0xFF009688), // Teal
             contextual: false,
-            showsUserInterface: true,
+            showsUserInterface: false, // Don't open app, work in background
           ),
         ],
         additionalFlags: Int32List.fromList(
@@ -401,14 +403,14 @@ class NotificationService {
             '⏰ Snooze ${settings.snoozeMinutes}min',
             titleColor: const Color(0xFFFF9800),
             contextual: false,
-            showsUserInterface: true,
+            showsUserInterface: false, // Don't open app, work in background
           ),
           AndroidNotificationAction(
             'dismiss',
             '✓ Mark Taken',
             titleColor: const Color(0xFF009688),
             contextual: false,
-            showsUserInterface: true,
+            showsUserInterface: false, // Don't open app, work in background
           ),
         ],
       );

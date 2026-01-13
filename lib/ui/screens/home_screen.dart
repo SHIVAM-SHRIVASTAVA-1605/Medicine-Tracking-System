@@ -82,8 +82,48 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: medicines.length,
+            itemCount: medicines.length + 1, // +1 for end message
             itemBuilder: (context, index) {
+              // Show end of list message at the last index
+              if (index == medicines.length) {
+                return Container(
+                  margin: const EdgeInsets.only(top: 8, bottom: 8),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primaryContainer
+                        .withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '✓ End of Medicine List (${medicines.length} ${medicines.length == 1 ? 'reminder' : 'reminders'})',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
               final medicine = medicines[index];
               // Find the key for this medicine
               final key = medicinesMap.keys.firstWhere(
@@ -135,7 +175,9 @@ class _MedicineCard extends StatelessWidget {
             Checkbox(
               value: medicine.isTaken,
               onChanged: (value) {
-                context.read<MedicineProvider>().toggleMedicineTaken(medicineKey);
+                context
+                    .read<MedicineProvider>()
+                    .toggleMedicineTaken(medicineKey);
               },
               shape: const CircleBorder(),
             ),
@@ -151,7 +193,8 @@ class _MedicineCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      decoration: medicine.isTaken ? TextDecoration.lineThrough : null,
+                      decoration:
+                          medicine.isTaken ? TextDecoration.lineThrough : null,
                       color: medicine.isTaken ? Colors.grey : null,
                     ),
                   ),
@@ -165,11 +208,13 @@ class _MedicineCard extends StatelessWidget {
                     ),
                   ),
                   // Last taken (if recurring)
-                  if (medicine.isRecurring && medicine.lastTakenDate != null) ...[
+                  if (medicine.isRecurring &&
+                      medicine.lastTakenDate != null) ...[
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.check_circle, size: 14, color: Colors.green[700]),
+                        Icon(Icons.check_circle,
+                            size: 14, color: Colors.green[700]),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -184,7 +229,8 @@ class _MedicineCard extends StatelessWidget {
                     ),
                   ],
                   // Next scheduled (if recurring)
-                  if (medicine.isRecurring && medicine.nextScheduledDate != null) ...[
+                  if (medicine.isRecurring &&
+                      medicine.nextScheduledDate != null) ...[
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -214,7 +260,8 @@ class _MedicineCard extends StatelessWidget {
                 if (medicine.isRecurring)
                   Container(
                     margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.blue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -281,7 +328,9 @@ class _MedicineCard extends StatelessWidget {
           TextButton(
             onPressed: () async {
               try {
-                await context.read<MedicineProvider>().deleteMedicineByKey(medicineKey);
+                await context
+                    .read<MedicineProvider>()
+                    .deleteMedicineByKey(medicineKey);
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
