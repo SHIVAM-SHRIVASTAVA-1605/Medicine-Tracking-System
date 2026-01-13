@@ -38,16 +38,17 @@ class NotificationService {
       final initialized = await _notifications.initialize(
         initSettings,
         onDidReceiveNotificationResponse: (details) async {
-          print('\n\n');
-          print('═══════════════════════════════════════════════════');
-          print('🔔 NOTIFICATION RESPONSE DETECTED');
-          print('═══════════════════════════════════════════════════');
-          print('📋 Payload: ${details.payload ?? "NULL"}');
-          print(
-              '🎯 Action ID: ${details.actionId ?? "NULL (notification tapped)"}');
-          print('📝 Input: ${details.input ?? "NULL"}');
-          print('⏰ Time: ${DateTime.now()}');
-          print('───────────────────────────────────────────────────');
+          try {
+            print('\n\n');
+            print('═══════════════════════════════════════════════════');
+            print('🔔 NOTIFICATION RESPONSE DETECTED');
+            print('═══════════════════════════════════════════════════');
+            print('📋 Payload: ${details.payload ?? "NULL"}');
+            print(
+                '🎯 Action ID: ${details.actionId ?? "NULL (notification tapped)"}');
+            print('📝 Input: ${details.input ?? "NULL"}');
+            print('⏰ Time: ${DateTime.now()}');
+            print('───────────────────────────────────────────────────');
 
           // Handle notification actions
           if (details.actionId == 'snooze') {
@@ -109,6 +110,17 @@ class NotificationService {
           }
           print('═══════════════════════════════════════════════════');
           print('\n\n');
+          } catch (e, stackTrace) {
+            print('\n');
+            print('═══════════════════════════════════════════════════');
+            print('⚠️  ERROR IN NOTIFICATION CALLBACK');
+            print('═══════════════════════════════════════════════════');
+            print('❌ Error: $e');
+            print('📋 Stack trace: $stackTrace');
+            print('🔄 Continuing execution...');
+            print('═══════════════════════════════════════════════════');
+            print('\n');
+          }
         },
       );
 

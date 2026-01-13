@@ -45,72 +45,91 @@ class MedicineProvider extends ChangeNotifier {
   }
 
   Future<void> deleteMedicineByKey(dynamic key) async {
-    final box = HiveService.getMedicineBox();
-    final medicine = box.get(key);
+    try {
+      final box = HiveService.getMedicineBox();
+      final medicine = box.get(key);
 
-    if (medicine != null) {
-      await NotificationService.cancelNotification(medicine.notificationId);
-      await box.delete(key);
+      if (medicine != null) {
+        print('🗑️  Deleting medicine: ${medicine.name} (ID: ${medicine.notificationId})');
+        await NotificationService.cancelNotification(medicine.notificationId);
+        await box.delete(key);
+        print('✅ Medicine deleted successfully');
+        notifyListeners();
+      } else {
+        print('⚠️  Medicine with key $key not found');
+      }
+    } catch (e, stackTrace) {
+      print('❌ Error deleting medicine: $e');
+      print('Stack trace: $stackTrace');
+      // Still notify listeners to update UI
       notifyListeners();
+      rethrow; // Re-throw so UI can show error
     }
   }
 
   Future<void> toggleMedicineTaken(dynamic key) async {
-    final box = HiveService.getMedicineBox();
-    final medicine = box.get(key);
+    try {
+      final box = HiveService.getMedicineBox();
+      final medicine = box.get(key);
 
-    if (medicine != null) {
-      medicine.isTaken = !medicine.isTaken;
+      if (medicine != null) {
+        medicine.isTaken = !medicine.isTaken;
 
-      // If marking as taken
-      if (medicine.isTaken) {
-        // Add to history
-        medicine.takenHistory.add(DateTime.now());
-        medicine.lastTakenDate = DateTime.now();
+        // If marking as taken
+        if (medicine.isTaken) {
+          // Add to history
+          medicine.takenHistory.add(DateTime.now());
+          medicine.lastTakenDate = DateTime.now();
 
-        // If it's a recurring medicine, schedule next occurrence
-        if (medicine.isRecurring) {
-          // Calculate next scheduled date
-          DateTime nextDate;
-          if (medicine.recurrenceType == 'daily') {
-            nextDate = DateTime.now().add(const Duration(days: 1));
-          } else {
-            // custom interval
-            nextDate = DateTime.now().add(Duration(days: medicine.recurrenceInterval));
+          // If it's a recurring medicine, schedule next occurrence
+          if (medicine.isRecurring) {
+            // Calculate next scheduled date
+            DateTime nextDate;
+            if (medicine.recurrenceType == 'daily') {
+              nextDate = DateTime.now().add(const Duration(days: 1));
+            } else {
+              // custom interval
+              nextDate = DateTime.now().add(Duration(days: medicine.recurrenceInterval));
+            }
+
+            // Set time to the scheduled time of day
+            medicine.nextScheduledDate = DateTime(
+              nextDate.year,
+              nextDate.month,
+              nextDate.day,
+              medicine.time.hour,
+              medicine.time.minute,
+            );
+
+            // Schedule the next notification
+            await NotificationService.scheduleNotification(
+              id: medicine.notificationId,
+              title: 'Medicine Reminder',
+              body: 'Time to take ${medicine.name} - ${medicine.dose}',
+              scheduledTime: medicine.nextScheduledDate!,
+            );
+
+            // Mark as not taken for next occurrence
+            medicine.isTaken = false;
           }
-
-          // Set time to the scheduled time of day
-          medicine.nextScheduledDate = DateTime(
-            nextDate.year,
-            nextDate.month,
-            nextDate.day,
-            medicine.time.hour,
-            medicine.time.minute,
-          );
-
-          // Schedule the next notification
-          await NotificationService.scheduleNotification(
-            id: medicine.notificationId,
-            title: 'Medicine Reminder',
-            body: 'Time to take ${medicine.name} - ${medicine.dose}',
-            scheduledTime: medicine.nextScheduledDate!,
-          );
-
-          // Mark as not taken for next occurrence
-          medicine.isTaken = false;
+        } else {
+          // If unmarking as taken, remove the last entry from history
+          if (medicine.takenHistory.isNotEmpty) {
+            medicine.takenHistory.removeLast();
+            medicine.lastTakenDate = medicine.takenHistory.isNotEmpty 
+                ? medicine.takenHistory.last 
+                : null;
+          }
         }
-      } else {
-        // If unmarking as taken, remove the last entry from history
-        if (medicine.takenHistory.isNotEmpty) {
-          medicine.takenHistory.removeLast();
-          medicine.lastTakenDate = medicine.takenHistory.isNotEmpty 
-              ? medicine.takenHistory.last 
-              : null;
-        }
+
+        await box.put(key, medicine);
+        notifyListeners();
       }
-
-      await box.put(key, medicine);
+    } catch (e, stackTrace) {
+      print('❌ Error toggling medicine taken status: $e');
+      print('Stack trace: $stackTrace');
       notifyListeners();
+      // Don't rethrow here - allow UI to continue
     }
   }
 

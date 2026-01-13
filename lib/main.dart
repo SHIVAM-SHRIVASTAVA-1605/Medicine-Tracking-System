@@ -58,22 +58,23 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _handleNotificationAction(String action) async {
-    print('\n');
-    print('╔═══════════════════════════════════════════════════╗');
-    print('║   HANDLING NOTIFICATION ACTION                    ║');
-    print('╚═══════════════════════════════════════════════════╝');
-    print('🎯 Action String: "$action"');
-    print('⏰ Processing Time: ${DateTime.now()}');
+    try {
+      print('\n');
+      print('╔═══════════════════════════════════════════════════╗');
+      print('║   HANDLING NOTIFICATION ACTION                    ║');
+      print('╚═══════════════════════════════════════════════════╝');
+      print('🎯 Action String: "$action"');
+      print('⏰ Processing Time: ${DateTime.now()}');
 
-    final context = navigatorKey.currentContext;
-    print('🔍 Checking context availability...');
-    if (context == null) {
-      print('❌ FATAL ERROR: Context is null!');
-      print('   Cannot access Provider without context');
-      print('   NavigatorKey might not be properly initialized');
-      return;
-    }
-    print('✅ Context is available');
+      final context = navigatorKey.currentContext;
+      print('🔍 Checking context availability...');
+      if (context == null) {
+        print('❌ FATAL ERROR: Context is null!');
+        print('   Cannot access Provider without context');
+        print('   NavigatorKey might not be properly initialized');
+        return;
+      }
+      print('✅ Context is available');
 
     if (action.startsWith('snooze_')) {
       print('\n🔔 SNOOZE ACTION DETECTED');
@@ -197,10 +198,20 @@ class _MyAppState extends State<MyApp> {
         print('❌ ERROR: Could not parse ID from string "$idStr"');
       }
     }
-    print('\n╔═══════════════════════════════════════════════════╗');
-    print('║   ACTION HANDLING COMPLETE                        ║');
-    print('╚═══════════════════════════════════════════════════╝');
-    print('\n');
+      print('\n╔═══════════════════════════════════════════════════╗');
+      print('║   ACTION HANDLING COMPLETE                        ║');
+      print('╚═══════════════════════════════════════════════════╝');
+      print('\n');
+    } catch (e, stackTrace) {
+      print('\n');
+      print('╔═══════════════════════════════════════════════════╗');
+      print('║   ⚠️  ERROR IN NOTIFICATION HANDLER                ║');
+      print('╚═══════════════════════════════════════════════════╝');
+      print('❌ Error: $e');
+      print('📋 Stack trace: $stackTrace');
+      print('🔄 App will continue running...');
+      print('\n');
+    }
   }
 
   @override
