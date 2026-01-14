@@ -46,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
                 leading: const Icon(Icons.help_outline, color: Colors.orange),
                 title: const Text('Help & Support'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showHelp(context),
+                onTap: () => Navigator.pushNamed(context, '/help-support'),
               ),
             ],
           );
@@ -173,67 +173,6 @@ class SettingsScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showHelp(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Help & Tips'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '🔔 Testing Notifications',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 4),
-              Text('Tap the bell icon on home screen to test your alarm.'),
-              SizedBox(height: 12),
-              Text(
-                '⏰ Snooze Feature',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 4),
-              Text(
-                  'When alarm rings, tap "Snooze" button to delay it by your chosen duration.'),
-              SizedBox(height: 12),
-              Text(
-                '✓ Mark as Taken',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 4),
-              Text(
-                  'Tap "Mark Taken" on notification to dismiss and mark medicine as taken.'),
-              SizedBox(height: 12),
-              Text(
-                '🔊 Custom Sounds',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 4),
-              Text(
-                  'To add custom alarm sounds, place MP3 files in android/app/src/main/res/raw/'),
-              SizedBox(height: 12),
-              Text(
-                '⚙️ Permissions',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 4),
-              Text(
-                  'Ensure notification and exact alarm permissions are granted for reliable alarms.'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
           ),
         ],
       ),

@@ -11,6 +11,7 @@ import 'ui/screens/home_screen.dart';
 import 'ui/screens/add_medicine_screen.dart';
 import 'ui/screens/settings_screen.dart';
 import 'ui/screens/statistics_screen.dart';
+import 'ui/screens/help_support_screen.dart';
 import 'ui/screens/alarm_screen.dart';
 import 'data/models/medicine_model.dart';
 
@@ -330,6 +331,7 @@ class _MyAppState extends State<MyApp> {
           '/add-medicine': (context) => const AddMedicineScreen(),
           '/settings': (context) => const SettingsScreen(),
           '/statistics': (context) => const StatisticsScreen(),
+          '/help-support': (context) => const HelpSupportScreen(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == '/alarm') {

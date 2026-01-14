@@ -283,8 +283,11 @@ class NotificationService {
             showsUserInterface: true,
           ),
         ],
-        additionalFlags: Int32List.fromList(
-            [4, 16]), // FLAG_INSISTENT and FLAG_AUTO_CANCEL flags
+        additionalFlags: Int32List.fromList([
+          4, // FLAG_INSISTENT (keeps playing sound/vibration)
+          128, // FLAG_SHOW_WHEN_LOCKED (show on lock screen)
+          2097152, // FLAG_TURN_SCREEN_ON (turn screen on)
+        ]),
       );
 
       await _notifications.zonedSchedule(
@@ -435,6 +438,11 @@ class NotificationService {
             showsUserInterface: true,
           ),
         ],
+        additionalFlags: Int32List.fromList([
+          4, // FLAG_INSISTENT (keeps playing sound/vibration)
+          128, // FLAG_SHOW_WHEN_LOCKED (show on lock screen)
+          2097152, // FLAG_TURN_SCREEN_ON (turn screen on)
+        ]),
       );
 
       final NotificationDetails notificationDetails =
