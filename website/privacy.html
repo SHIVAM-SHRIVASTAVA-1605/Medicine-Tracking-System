@@ -142,6 +142,62 @@
         .back-link:hover {
             text-decoration: underline;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            nav ul li {
+                text-align: center;
+            }
+
+            .content h1 {
+                font-size: 2rem;
+            }
+
+            .content h2 {
+                font-size: 1.5rem;
+            }
+
+            .content h3 {
+                font-size: 1.2rem;
+            }
+
+            .footer-links a {
+                display: inline-block;
+                margin: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav ul {
+                gap: 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .content h1 {
+                font-size: 1.8rem;
+            }
+
+            .content h2 {
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
 <body>
