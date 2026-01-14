@@ -1,5 +1,7 @@
 package com.example.medicine_reminder
 
+import android.app.KeyguardManager
+import android.content.Context
 import android.os.Build
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
@@ -41,6 +43,16 @@ class MainActivity: FlutterActivity() {
                         )
                     }
                     result.success(true)
+                }
+                "isDeviceLocked" -> {
+                    // Check if device is locked
+                    val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                    val isLocked = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                        keyguardManager.isDeviceLocked
+                    } else {
+                        keyguardManager.isKeyguardLocked
+                    }
+                    result.success(isLocked)
                 }
                 else -> result.notImplemented()
             }

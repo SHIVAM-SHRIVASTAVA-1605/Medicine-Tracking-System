@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'data/local/hive_service.dart';
@@ -55,7 +56,34 @@ class _MyAppState extends State<MyApp> {
       _handleNotificationAction(action);
     };
     print('✅ Notification handler setup complete');
+    
+    // Process any pending actions that occurred before callback was set
+    print('🔍 Checking for pending notification actions...');
+    final pendingActions = NotificationService.getPendingActions();
+    if (pendingActions.isNotEmpty) {
+      print('⚡ Processing ${pendingActions.length} pending action(s)');
+      for (final action in pendingActions) {
+        print('   Processing: $action');
+        _handleNotificationAction(action);
+      }
+    } else {
+      print('✅ No pending actions');
+    }
     print('\n');
+  }
+
+  // Check if device is locked using platform channel
+  Future<bool> _isDeviceLocked() async {
+    try {
+      const platform = MethodChannel('com.example.medicine_reminder/lockscreen');
+      final bool isLocked = await platform.invokeMethod('isDeviceLocked');
+      print('🔒 Device locked status: $isLocked');
+      return isLocked;
+    } catch (e) {
+      print('❌ Error checking device lock status: $e');
+      // If we can't determine, assume unlocked to show notification normally
+      return false;
+    }
   }
 
   void _handleNotificationAction(String action) async {
@@ -88,6 +116,17 @@ class _MyAppState extends State<MyApp> {
 
         if (id != null) {
           print('✅ Valid notification ID');
+          
+          // Check if device is locked
+          final isLocked = await _isDeviceLocked();
+          
+          if (!isLocked) {
+            print('📱 Device is UNLOCKED - Not showing full alarm screen');
+            print('   User can use notification action buttons instead');
+            return; // Don't show alarm screen when device is unlocked
+          }
+          
+          print('🔒 Device is LOCKED - Showing full alarm screen');
           print('🔍 Searching for medicine with notification ID: $id');
 
           // Find the medicine by notification ID
@@ -172,6 +211,17 @@ class _MyAppState extends State<MyApp> {
               body: 'Time to take ${medicine.name} - ${medicine.dose}',
             );
             print('✅ Notification snoozed successfully (background)');
+            
+            // Show brief feedback to user
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${medicine.name} reminder snoozed'),
+                  backgroundColor: Colors.orange,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
           } else {
             print('\n❌ ERROR: Medicine not found!');
             print('   No medicine has notification ID: $id');
@@ -218,6 +268,17 @@ class _MyAppState extends State<MyApp> {
               await provider.toggleMedicineTaken(entry.key);
               print('✅ Medicine marked as taken successfully (background)');
               print('   New taken status: ${entry.value.isTaken}');
+              
+              // Show brief feedback to user
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${entry.value.name} marked as taken'),
+                    backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
               break;
             }
           }

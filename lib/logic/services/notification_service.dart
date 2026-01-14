@@ -14,6 +14,9 @@ class NotificationService {
 
   // Callback for notification actions
   static Function(String)? onNotificationAction;
+  
+  // Store pending actions that occurred before callback was set
+  static final List<String> _pendingActions = [];
 
   static Future<void> loadSettings() async {
     // Settings will be loaded on-demand when needed
@@ -48,6 +51,7 @@ class NotificationService {
                 '🎯 Action ID: ${details.actionId ?? "NULL (notification tapped)"}');
             print('📝 Input: ${details.input ?? "NULL"}');
             print('⏰ Time: ${DateTime.now()}');
+            print('🔍 Notification ID: ${details.id}');
             print('───────────────────────────────────────────────────');
 
             // Handle notification actions
@@ -63,8 +67,14 @@ class NotificationService {
                   print('✅ Notification $id cancelled successfully');
                   print('📞 Calling callback: snooze_${details.payload}');
                   // Call the callback with snooze action
-                  onNotificationAction?.call('snooze_${details.payload}');
-                  print('✅ Snooze callback executed');
+                  final action = 'snooze_${details.payload}';
+                  if (onNotificationAction != null) {
+                    onNotificationAction?.call(action);
+                    print('✅ Snooze callback executed');
+                  } else {
+                    print('⚠️  Callback not ready, storing action for later');
+                    _pendingActions.add(action);
+                  }
                 } else {
                   print('❌ ERROR: Could not parse notification ID');
                 }
@@ -83,8 +93,14 @@ class NotificationService {
                   print('✅ Notification $id cancelled successfully');
                   print('📞 Calling callback: dismiss_${details.payload}');
                   // Call the callback with dismiss action
-                  onNotificationAction?.call('dismiss_${details.payload}');
-                  print('✅ Mark Taken callback executed');
+                  final action = 'dismiss_${details.payload}';
+                  if (onNotificationAction != null) {
+                    onNotificationAction?.call(action);
+                    print('✅ Mark Taken callback executed');
+                  } else {
+                    print('⚠️  Callback not ready, storing action for later');
+                    _pendingActions.add(action);
+                  }
                 } else {
                   print('❌ ERROR: Could not parse notification ID');
                 }
@@ -101,8 +117,14 @@ class NotificationService {
                 if (id != null) {
                   print('📞 Calling callback: tap_${details.payload}');
                   // Call the callback to show alarm screen
-                  onNotificationAction?.call('tap_${details.payload}');
-                  print('✅ Tap callback executed');
+                  final action = 'tap_${details.payload}';
+                  if (onNotificationAction != null) {
+                    onNotificationAction?.call(action);
+                    print('✅ Tap callback executed');
+                  } else {
+                    print('⚠️  Callback not ready, storing action for later');
+                    _pendingActions.add(action);
+                  }
                 } else {
                   print('❌ ERROR: Could not parse notification ID');
                 }
@@ -241,7 +263,7 @@ class NotificationService {
         ticker: 'Time to take your medicine!',
         category: AndroidNotificationCategory.alarm,
         visibility: NotificationVisibility.public,
-        fullScreenIntent: settings.showOnLockScreen, // Use settings
+        fullScreenIntent: true, // Show on lock screen
         // Audio attributes to make it sound like an alarm
         audioAttributesUsage: AudioAttributesUsage.alarm,
         // Action buttons
@@ -251,14 +273,14 @@ class NotificationService {
             '⏰ Snooze ${settings.snoozeMinutes}min',
             titleColor: const Color(0xFFFF9800), // Orange
             contextual: false,
-            showsUserInterface: false, // Don't open app, work in background
+            showsUserInterface: true,
           ),
           AndroidNotificationAction(
             'dismiss',
             '✓ Mark Taken',
             titleColor: const Color(0xFF009688), // Teal
             contextual: false,
-            showsUserInterface: false, // Don't open app, work in background
+            showsUserInterface: true,
           ),
         ],
         additionalFlags: Int32List.fromList(
@@ -395,7 +417,7 @@ class NotificationService {
         ticker: 'Time to take your medicine!',
         category: AndroidNotificationCategory.alarm,
         visibility: NotificationVisibility.public,
-        fullScreenIntent: settings.showOnLockScreen,
+        fullScreenIntent: true, // Show on lock screen
         audioAttributesUsage: AudioAttributesUsage.alarm,
         actions: <AndroidNotificationAction>[
           AndroidNotificationAction(
@@ -403,14 +425,14 @@ class NotificationService {
             '⏰ Snooze ${settings.snoozeMinutes}min',
             titleColor: const Color(0xFFFF9800),
             contextual: false,
-            showsUserInterface: false, // Don't open app, work in background
+            showsUserInterface: true,
           ),
           AndroidNotificationAction(
             'dismiss',
             '✓ Mark Taken',
             titleColor: const Color(0xFF009688),
             contextual: false,
-            showsUserInterface: false, // Don't open app, work in background
+            showsUserInterface: true,
           ),
         ],
       );
@@ -433,5 +455,13 @@ class NotificationService {
       print('ERROR showing notification: $e');
       print('Stack trace: $stackTrace');
     }
+  }
+  
+  // Process any pending actions that occurred before callback was set
+  static List<String> getPendingActions() {
+    final actions = List<String>.from(_pendingActions);
+    _pendingActions.clear();
+    print('🔄 Retrieved ${actions.length} pending actions');
+    return actions;
   }
 }
