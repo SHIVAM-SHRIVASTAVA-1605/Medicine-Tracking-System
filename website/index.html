@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Reminder - Your Health Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background-color: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .features {
+            padding: 4rem 2rem;
+            background-color: #f8f9fa;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #333;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-card p {
+            color: #666;
+        }
+
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-links {
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            margin: 0 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">💊 Medicine Reminder</div>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Never Miss Your Medication Again</h1>
+            <p>Your personal health companion for managing medicines and reminders</p>
+            <a href="app.apk" download="MedicineReminder.apk" class="btn">Download APK</a>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Why Choose Medicine Reminder?</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>⏰ Smart Reminders</h3>
+                    <p>Get timely notifications for your medication schedule, so you never forget a dose.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📊 Track History</h3>
+                    <p>Keep a complete history of your medication intake and monitor your health patterns.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔐 Secure & Private</h3>
+                    <p>Your health data is encrypted and kept confidential with the highest security standards.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📱 Easy to Use</h3>
+                    <p>Simple and intuitive interface designed for users of all ages and technical abilities.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>👨‍⚕️ Health Insights</h3>
+                    <p>Get personalized insights about your medication adherence and health metrics.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🌍 Available Everywhere</h3>
+                    <p>Access your reminders on iOS, Android, and other platforms, anytime, anywhere.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" style="padding: 4rem 2rem; text-align: center;">
+        <div class="container">
+            <h2 style="font-size: 2.5rem; margin-bottom: 1rem; color: #333;">About Medicine Reminder</h2>
+            <p style="font-size: 1.1rem; color: #666; max-width: 800px; margin: 0 auto;">
+                Medicine Reminder is designed to help you stay on top of your healthcare routine. 
+                With intelligent reminders and an easy-to-use interface, managing your medications has never been simpler.
+                Our mission is to improve health outcomes by helping people adhere to their medication schedules.
+            </p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="mailto:support@medicinereminder.com">Contact Us</a>
+            </div>
+            <p>&copy; 2026 Medicine Reminder. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
