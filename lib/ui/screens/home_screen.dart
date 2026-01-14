@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../logic/providers/medicine_provider.dart';
-import '../../logic/services/notification_service.dart';
 import '../../data/models/medicine_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,28 +12,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  void _testNotification(BuildContext context) async {
-    // Show immediate test notification with actions
-    await NotificationService.showImmediateNotification(
-      id: 99999,
-      title: '💊 Medicine Reminder Test',
-      body: 'This is a test alarm notification with snooze option',
-    );
-
-    // Check pending scheduled notifications
-    final pending = await NotificationService.getPendingNotifications();
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Test alarm sent!\n${pending.length} scheduled notifications pending'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,13 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Statistics',
             onPressed: () {
               Navigator.pushNamed(context, '/statistics');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_active),
-            tooltip: 'Test Notification',
-            onPressed: () {
-              _testNotification(context);
             },
           ),
           IconButton(
