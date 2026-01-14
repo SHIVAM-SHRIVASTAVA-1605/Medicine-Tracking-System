@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
@@ -183,14 +184,28 @@ class HelpSupportScreen extends StatelessWidget {
                     backgroundColor: Colors.teal,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: () {
-                    // You can implement email functionality here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Support contact: support@medicinereminder.com'),
-                        duration: Duration(seconds: 3),
-                      ),
+                  onPressed: () async {
+                    final Uri emailUri = Uri(
+                      scheme: 'mailto',
+                      path: 'shivam091204@gmail.com',
+                      query: 'subject=Medicine Reminder Support',
                     );
+                    
+                    try {
+                      await launchUrl(
+                        emailUri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Could not open email app. Please email us at shivam091204@gmail.com'),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    }
                   },
                   child: const Text('Contact Support'),
                 ),
